@@ -11,6 +11,14 @@
     hostname: testunical
     domain1: it
     domain: "{{ hostname }}.{{ domain1 }}"
+
+    rt_release: 4.4.2
+    rt_pkg: "rt-{{ rt_release }}.tar.gz"
+    # https://bestpractical.com/download-page
+    rt_download_url: https://download.bestpractical.com/pub/rt/release/{{ rt_pkg }}
+
+    rt_dest_dir: "/opt"
+    rt_path: "rt-{{ rt_release }}"
     
     rt_fqdn: "rt.{{ domain }}"
     rt_correspond_addr: "rt@testunical.it"
@@ -38,5 +46,5 @@
 
   roles:   
     # apt dependencies and certificates
-    - { role: common, tags: ["common"] }
+    # - { role: common, tags: ["common"] }
     - { role: rt4, tags: ["rt4"] }

@@ -12,15 +12,17 @@
   apt: name={{ item }} state=present
   with_items:
     - perl-doc
-    - rt4-apache2
-    - rt4-clients
-    - rt4-db-mysql
-    - rt4-doc-html
-    - rt4-extension-calendar
-    - rt4-extension-customfieldsonupdate
-    - rt4-extension-jsgantt
-    - rt4-extension-repeatticket
-    - rt4-extension-smsnotify
+    - libgdchart-gd2-xpm
+    - build-essential
+    # - rt4-apache2
+    # - rt4-clients
+    # - rt4-db-mysql
+    # - rt4-doc-html
+    # - rt4-extension-calendar
+    # - rt4-extension-customfieldsonupdate
+    # - rt4-extension-jsgantt
+    # - rt4-extension-repeatticket
+    # - rt4-extension-smsnotify
     - mariadb-server
   tags: online
 

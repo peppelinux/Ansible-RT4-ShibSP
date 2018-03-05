@@ -1,42 +1,66 @@
-- name: Stat /etc/request-tracker4/apache2-modperl2.conf
-  stat: path="/etc/request-tracker4/apache2-modperl2.conf"
-  register: site_enabled
+- name: "Stat {{ rt_download_url }} /opt"
+  stat: path="{{ rt_dest_dir }}/{{ rt_pkg }}"
+  register: rt_tarball
+
+- name: "Download {{ rt_download_url }} "
+  get_url: url={{ rt_download_url }} dest=/opt
+  when: rt_tarball.stat.exists == False
+
+- name: "Unarchive {{ rt_dest_dir }}/{{ rt_pkg }}"
+  unarchive: src="{{ rt_dest_dir }}/{{ rt_pkg }}" dest="{{ rt_dest_dir }}" copy=no
+  # without copy=no means that src= should be on a localpath. Then file will be uploadade and unarchived 
+
+- name: "Configure {{ rt_path }}"
+  command: "{{ rt_path }}/bin/install.sh \
+            -Didp.sealer.password={{ idp_secret }} \
+            -Didp.keystore.password={{ idp_secret }} \
+            -Didp.scope={{ domain }} \
+            -Didp.src.dir={{ shib_setup_folder }} \
+            -Didp.host.name={{ idp_fqdn }} \
+            -Didp.target.dir={{ idp_path }} \
+            -Didp.merge.properties={{ tmp_upload_dir }}/shib-install.properties"
+  when: shib_dir_dest.stat.exists == False 
+
+# ================= @ the end ============================
+# - name: Stat /etc/request-tracker4/apache2-modperl2.conf
+  # stat: path="/etc/request-tracker4/apache2-modperl2.conf"
+  # register: site_enabled
   
-- name: "Enable RT4 in Apache2"
-  shell: ln -s  /etc/request-tracker4/apache2-modperl2.conf /etc/apache2/sites-enabled/
-  when: site_enabled.stat.exists == False 
+# - name: "Enable RT4 in Apache2"
+  # shell: ln -s  /etc/request-tracker4/apache2-modperl2.conf /etc/apache2/sites-enabled/
+  # when: site_enabled.stat.exists == False 
   
-- name: upload sql datatabse
-  template: 
-    src: roles/rt4/templates/db.sql
-    dest: "{{ tmp_upload_dir }}/db.sql"
+# - name: upload sql datatabse
+  # template: 
+    # src: roles/rt4/templates/db.sql
+    # dest: "{{ tmp_upload_dir }}/db.sql"
 
-- name: Create RT4 Database
-  shell: "mysql -u root < {{ tmp_upload_dir }}/db.sql"
+# - name: Create RT4 Database
+  # shell: "mysql -u root < {{ tmp_upload_dir }}/db.sql"
 
-- name: "copy orig {{ rt_db_conf }}"
-  shell: "mv {{ rt_db_conf }} backups"
-  ignore_errors: yes
+# ================= to be changed according to new setup, source oriented
 
-- name: configure DB access
-  template:
-    src: roles/rt4/templates/db_config.pm
-    dest: "{{ rt_db_conf }}"
+# - name: "copy orig {{ rt_db_conf }}"
+  # shell: "mv {{ rt_db_conf }} backups"
+  # ignore_errors: yes
 
-- name: "copy orig {{ rt_https_conf }}"
-  shell: "mv {{ rt_https_conf }} backups"
-  ignore_errors: yes
+# - name: configure DB access
+  # template:
+    # src: roles/rt4/templates/db_config.pm
+    # dest: "{{ rt_db_conf }}"
 
-- name: configure HTTPS hostname
-  template:
-    src: roles/rt4/templates/https_config.pm
-    dest: "{{ rt_https_conf }}"
+# - name: "copy orig {{ rt_https_conf }}"
+  # shell: "mv {{ rt_https_conf }} backups"
+  # ignore_errors: yes
+
+# - name: configure HTTPS hostname
+  # template:
+    # src: roles/rt4/templates/https_config.pm
+    # dest: "{{ rt_https_conf }}"
 
 # otherwise: Config file /etc/request-tracker4/RT_SiteConfig.pm is locked 
-- name: Change Permissions on /etc/request-tracker4/RT_SiteConfig.pm (Apache2's www-data should write on this)
-  shell: chown www-data /etc/request-tracker4/RT_SiteConfig.pm
+# - name: Change Permissions on /etc/request-tracker4/RT_SiteConfig.pm (Apache2's www-data should write on this)
+  # shell: chown www-data /etc/request-tracker4/RT_SiteConfig.pm
     
 - name: Restart Apache2
   service: name=apache2 state=restarted enabled=yes
-
-  
