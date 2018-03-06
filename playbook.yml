@@ -7,44 +7,15 @@
 - name: Install Ansible-RT4-ShibIDP on MariaDB
   hosts: all
   become: yes
+  vars_files:
+    - rt_vars.yml
+
   vars:
-    hostname: testunical
-    domain1: it
-    domain: "{{ hostname }}.{{ domain1 }}"
-
-    rt_release: 4.4.2
-    rt_pkg: "rt-{{ rt_release }}.tar.gz"
-    # https://bestpractical.com/download-page
-    rt_download_url: https://download.bestpractical.com/pub/rt/release/{{ rt_pkg }}
-
-    rt_dest_dir: "/opt"
-    rt_path: "rt-{{ rt_release }}"
-    
-    rt_fqdn: "rt.{{ domain }}"
-    rt_correspond_addr: "rt@testunical.it"
-    rt_comment_addr: "rt@testunical.it"
-    rt_web_path: "/rt"
-    rt_http_port: 443
-    
-    rt_administrative_password: rt_secret
-    
     # If True it will uninstall and purge existing applications and configurations
     # DO NOT DO THAT in production environment
-    purge: true
-    
-    idp_ip:   "192.168.3.63" # example
-    
-    
-    rt_https_conf: /etc/request-tracker4/RT_SiteConfig.d/50-debconf.pm  
-    rt_db_conf: /etc/request-tracker4/RT_SiteConfig.d/51-dbconfig-common.pm
-    
-    db_name: rt4db
-    db_user: rt_user
-    db_passwd: rt_secret
-
-    tmp_upload_dir: "/tmp/Ansible-RT4-ShibIDP"
-
-  roles:   
+    - purge: true
+  
+  roles:
     # apt dependencies and certificates
-    # - { role: common, tags: ["common"] }
+    - { role: common, tags: ["common"] }
     - { role: rt4, tags: ["rt4"] }
