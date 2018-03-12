@@ -1,0 +1,3 @@
+- name: Drop database {{ db_name }}
+  shell: mysqladmin drop {{ db_passwd }} -f
+  ignore_errors: yes
