@@ -1,18 +1,58 @@
-# [notUsableYet] Ansible-RT4-ShibSP
+# Ansible-RT4-ShibSP
 
 according to
     - https://rt-wiki.bestpractical.com/wiki/ManualInstallation
 
+Configuration
+-------------
+
+In rt_vars.yml you'll need to configure your own values.
+Remeber to:
+
+- choose an appropriate fqdn and use it in make_ca.sh if you need a private CA for testing purpose.
+- this playbook, by default, will purge mysql and apache2 installations, but you can configure purge: false to avoid this.
+
+````
+  vars:
+    # If True it will uninstall and purge existing applications and configurations
+    # DO NOT DO THAT in production environment
+    purge: true
+````
+
+Requirements
+------------
+````    
+aptitude install python3-pip python-dev libffi-dev libssl-dev libxml2-dev libxslt1-dev libjpeg-dev zlib1g-dev
+pip3 install ansible
+````
+
+For a private CA for a testing purpose you can use make_ca.sh script
+
+````
+# Specify your preferred values in make_ca.sh script and then run it
+bash make_ca.sh
+````
+
+For shibboleth integration it need a preexistent SP local setup.
+Use this playbook for testing purpose if useful:
+
+https://github.com/peppelinux/Ansible-Shibboleth-IDP-SP-Debian9
+
+Status
+------
+
+1. Request tracker setup with MariaDB completed
+2. Shib-SP Base setup done, it needs major integrations in official production environment
 
 Usage
 -----
-Remember to customize your setup by editing variable in rt_vars.yml and playbook.yml
+Remember to customize your setup by editing variable in rt_vars.yml and playbook.yml, also remeber to create your own selfsigned certs if you do not have some of authoritative
 ````
 ansible-playbook -i "localhost," -c local playbook.yml [-vvv]
 ````
 
-Installing RT4 by hands
------------------------
+Installing RT4 by hands (if you want this)
+------------------------------------------
 ````
 # as root user
 # dependencies Debian9
@@ -64,6 +104,14 @@ make initialize-database
 
 ````
 
+System check's
+--------------
+
+````
+# view all CNA installed modules
+cpan -l
+````
+
 Resources
 ---------
 
@@ -72,13 +120,13 @@ Resources
 - https://www.nsrc.org/workshops/templates-old/brian/foo/exercises-rt-lab1.md.html
 - http://www.sgsosu.net/nmetro/docs.html
 
+Shibboleth's
+- http://archiv.cesnet.cz/doc/techzpravy/2010/request-tracker-shibboleth/
+- http://search.cpan.org/~bps/RT-Authen-ExternalAuth/lib/RT/Authen/ExternalAuth.pm
+- https://stackoverflow.com/questions/45620314/shibboleth-on-request-tracker-4-4-x
+- https://github.com/bestpractical/rt/pull/208/
 
 Trouble shooting
 ----------------
 
 - https://rt-wiki.bestpractical.com/wiki/RecoverRootPassword
-
-WARNING: Both mod_speling and mod_cache are known to break RT.
-mod_speling will cause RT's CSS and JS to not be loaded, making RT
-appear unstyled. mod_cache will cache cookies, making users be
-spontaneously logged in as other users in the system.

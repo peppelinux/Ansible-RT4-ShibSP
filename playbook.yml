@@ -13,9 +13,15 @@
   vars:
     # If True it will uninstall and purge existing applications and configurations
     # DO NOT DO THAT in production environment
-    - purge: true
-  
+    purge: true
+
+    cert_path: "/etc/ssl/certs/{{ domain }}"
+
+
   roles:
     # apt dependencies and certificates
     - { role: common, tags: ["common"] }
     - { role: rt4, tags: ["rt4"] }
+
+    # for Shib SP integration
+    #- { role: rt4-shib_sp, tags: ["sp"] }

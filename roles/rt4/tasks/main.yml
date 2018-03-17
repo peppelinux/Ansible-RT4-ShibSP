@@ -17,6 +17,14 @@
     force: yes
     mode: 744
 
+- name: Enable Apache2 modules 
+  apache2_module: name={{ item }} state=present
+  with_items:
+    - ssl
+
+- name: CPAN default env configuration
+  shell: perl -MCPAN -e 'my $c = "CPAN::HandleConfig"; $c->load(doit => 1, autoconfig => 1); $c->edit(prerequisites_policy => "follow"); $c->edit(build_requires_install_policy => "yes"); $c->commit'
+
 - name: "Configure Installation"
   shell: "{{ rt_path }}/configure_script.sh"
   
@@ -37,13 +45,6 @@
 - name: Create RT4 Database
   shell: "mysql -u root < {{ tmp_upload_dir }}/db.sql"
 
-- name: General configuration
-  template: 
-    src: roles/rt4/templates/RT_SiteConfig.pm
-    dest: "{{ rt_path }}/etc/RT_SiteConfig.pm"
-    backup: yes
-    force: yes
-
 - name: Initialize DB
   command: chdir="{{ rt_path }}" make initialize-database
 # otherwise
@@ -54,20 +55,22 @@
   command: "perl -I/opt/rt4/local/lib -I/opt/rt4/lib -MRT -MRT::User \
            -e 'RT::LoadConfig(); RT::Init(); my $u = RT::User->new($RT::SystemUser); $u->Load(\"root\"); $u->SetPassword(\"{{ rt_root_password }}\")'"
 
+- name: Set default Admin language
+  command: "mysql -u root {{ db_name }} -e \" UPDATE Users SET Lang = '{{ rt_language }}' WHERE name = 'root'; \""
+
+- name: General configuration
+  template: 
+    src: roles/rt4/templates/RT_SiteConfig.pm
+    dest: "{{ rt_install_dir }}/etc/RT_SiteConfig.pm"
+    backup: yes
+    force: yes
+
 - name: Configure {{ rt_fqdn }} VirtualHost in Apache2
   template: 
     src: roles/rt4/templates/apache2_rt4_virtualhost.conf
     dest: "/etc/apache2/sites-available/{{ rt_fqdn }}.conf"
     force: yes
 
-# WARNING: Both mod_speling and mod_cache are known to break RT. mod_speling will cause RT's CSS and JS to not be loaded, making RT appear unstyled. mod_cache will cache cookies, making users be spontaneously logged in as other users in the system.
-# - name: Disable Apache2 modules
-  # apache2_module: name={{ item }} state=absent
-  # with_items:
-    # - speling
-    # - cache
-
-#WARNING: Before mod_fcgid 2.3.6, the maximum request size was 1GB. Starting in 2.3.6, this is now 128Kb. This is unlikely to be large enough for any RT install that handles attachments. You can read more about FcgidMaxRequestLen at http://httpd.apache.org/mod_fcgid/mod/mod_fcgid.html#fcgidmaxrequestlen
 - name: Enable Apache2 modules
   apache2_module: name={{ item }} state=present
   with_items:
@@ -80,41 +83,6 @@
     dest: "/etc/apache2/sites-enabled/{{ rt_fqdn }}.conf"
     force: yes
     state: link
-
-# ================= @ the end ============================
-# - name: Stat /etc/request-tracker4/apache2-modperl2.conf
-  # stat: path="/etc/request-tracker4/apache2-modperl2.conf"
-  # register: site_enabled
-  
-# - name: "Enable RT4 in Apache2"
-  # shell: ln -s  /etc/request-tracker4/apache2-modperl2.conf /etc/apache2/sites-enabled/
-  # when: site_enabled.stat.exists == False 
-
-# ===== deprecated, old debian package setup ===
-
-# - name: "copy orig {{ rt_db_conf }}"
-  # shell: "mv {{ rt_db_conf }} backups"
-  # ignore_errors: yes
-
-# - name: configure DB access
-  # template:
-    # src: roles/rt4/templates/db_config.pm
-    # dest: "{{ rt_db_conf }}"
-
-# - name: "copy orig {{ rt_https_conf }}"
-  # shell: "mv {{ rt_https_conf }} backups"
-  # ignore_errors: yes
-
-# - name: configure HTTPS hostname
-  # template:
-    # src: roles/rt4/templates/https_config.pm
-    # dest: "{{ rt_https_conf }}"
-
-# otherwise: Config file /etc/request-tracker4/RT_SiteConfig.pm is locked 
-# - name: Change Permissions on /etc/request-tracker4/RT_SiteConfig.pm (Apache2's www-data should write on this)
-  # shell: chown www-data /etc/request-tracker4/RT_SiteConfig.pm
-
-# ==== end deprecated =========================
 
 - name: Restart Apache2
   service: name=apache2 state=restarted enabled=yes

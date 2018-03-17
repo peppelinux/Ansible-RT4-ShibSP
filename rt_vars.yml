@@ -2,6 +2,8 @@ domain2: testunical
 domain1: it
 domain: "{{ domain2 }}.{{ domain1 }}"
 
+rt_timezone: Europe/Rome
+
 rt_release: 4.4.2
 rt_pkg: "rt-{{ rt_release }}.tar.gz"
 # https://bestpractical.com/download-page
@@ -9,6 +11,9 @@ rt_download_url: https://download.bestpractical.com/pub/rt/release/{{ rt_pkg }}
 
 rt_dest_dir: "/opt"
 rt_path: "{{ rt_dest_dir }}/rt-{{ rt_release }}"
+
+# if you change this value
+# you should also template this /opt/rt4/sbin/rt-server.fcgi
 rt_install_dir: "{{ rt_dest_dir }}/rt4"
 
 rt_fqdn: "rt.{{ domain }}"
@@ -17,6 +22,9 @@ rt_comment_addr: "rt@{{ rt_fqdn }}"
 rt_admin_email: "admin@{{ rt_fqdn }}"
 rt_web_path: "/rt"
 rt_http_port: 443
+
+rt_timezone: "Europe/Rome"
+rt_language: 'it'
 
 rt_root_password: root_secret
 

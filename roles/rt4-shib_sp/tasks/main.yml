@@ -1,0 +1,18 @@
+# - name: Install required ExternalAuth Perl module
+  # shell: cpan RT::Authen::ExternalAuth
+
+- name: General configuration
+  template: 
+    src: roles/rt4-shib_sp/templates/RT_SiteConfig.pm
+    dest: "{{ rt_install_dir }}/etc/RT_SiteConfig.pm"
+    backup: yes
+    force: yes
+
+- name: Configure {{ rt_fqdn }} VirtualHost in Apache2
+  template: 
+    src: roles/rt4-shib_sp/templates/apache2_rt4_virtualhost.conf
+    dest: "/etc/apache2/sites-available/{{ rt_fqdn }}.conf"
+    force: yes
+
+- name: Restart Apache2
+  service: name=apache2 state=restarted

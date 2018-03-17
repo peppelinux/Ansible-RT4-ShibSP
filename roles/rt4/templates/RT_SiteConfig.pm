@@ -31,18 +31,28 @@ use utf8;
 # of the correct syntax to use when activating them:
 #     Plugin( "RT::Authen::ExternalAuth" );
 
+# Set( $DatabaseHost, '{{ db_host }}' );
+# Set( $DatabaseName, '{{ db_name }}' );
+# Set( $DatabasePassword, '{{ db_passwd }}' );
+# Set( $DatabasePort, '' );
+# Set( $DatabaseType, 'mysql' );
+# Set( $DatabaseUser, '{{ db_user }}' );
+
+
 Set( $CommentAddress, '{{ rt_comment_addr }}' );
 Set( $CorrespondAddress, '{{ rt_correspond_addr }}' );
-Set( $DatabaseHost, '{{ db_host }}' );
-Set( $DatabaseName, '{{ db_name }}' );
-Set( $DatabasePassword, '{{ db_passwd }}' );
-Set( $DatabasePort, '' );
-Set( $DatabaseType, 'mysql' );
-Set( $DatabaseUser, '{{ db_user }}' );
 Set( $Organization, '{{ rt_fqdn }}' );
 Set( $OwnerEmail, '{{ rt_admin_email }}' );
 Set( $SendmailPath, '/usr/sbin/sendmail' );
 Set( $WebDomain, '{{ rt_fqdn }}' );
 Set( $WebPort, '443' );
 Set( $rtname, '{{ rt_fqdn }}' );
+
+# my $zone = “UTC”;
+# $zone=/bin/cat /etc/timezone
+# if -f “/etc/timezone”;
+# chomp $zone;
+Set($Timezone, "{{ rt_timezone }}");
+Set(@LexiconLanguages, qw({{ rt_language }})); 
+
 1;

@@ -1,13 +1,15 @@
 - name: Drop database {{ db_name }}
   shell: mysql -u root -e "DROP DATABASE IF EXISTS {{ db_name }};"
-  # ignore_errors: yes
+  ignore_errors: yes
 
 - name: Drop user {{ db_user }}
   shell: mysql -u root -e "DROP USER IF EXISTS '{{ db_user }}'@'localhost';"
-  # ignore_errors: yes
+  ignore_errors: yes
 
 - name: Purge setup and install dir
-  file: path="{{ rt_path }}/" state=absent
-  file: path="{{ rt_install_dir }}/" state=absent
-  file: path=" /etc/apache2/sites-enabled/{{ rt_fqdn }}.conf" state=absent
-  file: path=" /etc/apache2/sites-available/{{ rt_fqdn }}.conf" state=absent
+  file: path="{{ item }}" state=absent
+  with_items:
+    - "{{ rt_path }}/"
+    - "{{ rt_install_dir }}/"
+    - "/etc/apache2/sites-enabled/{{ rt_fqdn }}.conf"
+    - "/etc/apache2/sites-available/{{ rt_fqdn }}.conf"
